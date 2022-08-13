@@ -1,16 +1,80 @@
 import 'reflect-metadata'
 import { ApolloServer } from 'apollo-server-express'
 import { ApolloServerPluginLandingPageLocalDefault } from 'apollo-server-core'
-import { resolvers } from '@generated/type-graphql'
-import { buildSchema } from 'type-graphql'
-import { PrismaClient } from '@prisma/client'
+import jwt from 'jsonwebtoken'
 import express from 'express'
-const prisma = new PrismaClient()
+import { PrismaClient } from '@prisma/client'
+import { buildSchema, createMethodDecorator } from 'type-graphql'
+import { CustomUserResolver } from './resolver/auth'
+import {
+  TweetCrudResolver,
+  TweetRelationsResolver,
+  FollowCrudResolver,
+  FollowRelationsResolver,
+  UserRelationsResolver,
+  FindManyUserResolver,
+  GroupByUserResolver,
+  AggregateUserResolver,
+  FindFirstUserResolver,
+  FindUniqueUserResolver,
+  applyResolversEnhanceMap,
+  ResolversEnhanceMap,
+} from '@generated/type-graphql'
+
+export const prisma = new PrismaClient()
+
+function ValidateArgs(schema?: any) {
+  return createMethodDecorator(async ({ root, args, context, info }: any, next) => {
+    // here place your middleware code that uses custom decorator arguments
+
+    // e.g. validation logic based on schema using joi
+    // await joiValidate(schema, args)
+    try {
+      console.log(33333123, { root, args, context, info }, context?.req?.headers)
+      const { authorization } = context?.req?.headers || {}
+      const [stringBearer, accessToken] = (authorization || '')?.split(' ')
+      console.log(333334, { stringBearer, accessToken })
+      if (stringBearer !== 'Bearer') throw 'invalid bearer token'
+      const parseData = jwt.verify(accessToken as string, 'secret') as {
+        data: { role: string }
+      }
+      if (!parseData) throw 'invalid bearer token'
+      return next()
+    } catch (error) {
+      throw error
+    }
+  })
+}
+
+const resolversEnhanceMap: ResolversEnhanceMap = {
+  User: {
+    _all: [ValidateArgs()],
+  },
+  Tweet: {
+    _all: [ValidateArgs()],
+  },
+  Follow: {
+    _all: [ValidateArgs()],
+  },
+}
+
+applyResolversEnhanceMap(resolversEnhanceMap)
 
 const startServer = async () => {
-  console.log(33344, resolvers)
   const schema = await buildSchema({
-    resolvers,
+    resolvers: [
+      TweetCrudResolver,
+      TweetRelationsResolver,
+      FollowCrudResolver,
+      FollowRelationsResolver,
+      UserRelationsResolver,
+      FindManyUserResolver,
+      GroupByUserResolver,
+      AggregateUserResolver,
+      FindFirstUserResolver,
+      FindUniqueUserResolver,
+      CustomUserResolver,
+    ],
     validate: false,
   })
 
