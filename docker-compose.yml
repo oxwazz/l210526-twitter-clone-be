@@ -1,0 +1,16 @@
+version: "3.1"
+
+services:
+  pgdb:
+    image: postgres:alpine
+    container_name: db-create-simple-be
+    environment:
+      - POSTGRES_DB=betwitterts
+      - POSTGRES_USER=betwitterts
+      - POSTGRES_PASSWORD=betwitterts
+    ports:
+      - "5432:5432"
+    volumes:
+      - dbbetwitterts:/var/lib/postgresql/data/
+volumes:
+  dbbetwitterts:
