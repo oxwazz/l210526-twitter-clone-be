@@ -1,4 +1,5 @@
 import { faker } from '@faker-js/faker'
+import bcrypt from 'bcrypt'
 import { PrismaClient } from '@prisma/client'
 import { getRandomArbitrary } from '../helpers/get-random-number'
 const prisma = new PrismaClient()
@@ -9,15 +10,16 @@ async function main() {
   let userIds = []
   // user
   for (let i = 0; i < TOTAL_SEED_PER_TABLE; i++) {
-    const name = faker.name.findName()
+    const firstName = faker.name.firstName()
+    const lastName = faker.name.lastName()
     const data = await prisma.user.create({
       data: {
-        name,
-        email: faker.internet.email(name, undefined, 'example.com').toLowerCase(),
-        password: 'qweqweqwe',
+        name: `${firstName} ${lastName}`,
+        email: faker.internet.email(firstName, lastName, 'example.com').toLowerCase(),
+        password: await bcrypt.hash('qweqweqwe', 10),
         date_of_birth: faker.date.birthdate(),
         phone: faker.phone.number(),
-        username: faker.internet.userName(name),
+        username: faker.internet.userName(firstName, lastName).toLowerCase(),
         picture: faker.image.animals(640, 480, true),
       },
     })

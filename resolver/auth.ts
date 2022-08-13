@@ -6,8 +6,14 @@ import { Context } from './context'
 import { generateToken } from '../helpers/genetare-token'
 
 @InputType()
-class GetAccessTokenInput implements Partial<UserCreateInput> {
-  @Field()
+class GetAccessTokenInput implements Partial<User> {
+  @Field({ nullable: true })
+  username?: string
+
+  @Field({ nullable: true })
+  phone?: string
+
+  @Field({ nullable: true })
   email?: string
 
   @Field()
@@ -68,14 +74,19 @@ export class CustomUserResolver {
     @Ctx()
     ctx: Context
   ): Promise<any> {
-    const result = await ctx.prisma.user.findUnique({
+    const result = await ctx.prisma.user.findFirst({
       where: {
-        email: data.email,
+        AND: {
+          email: data.email,
+          phone: data.phone,
+          username: data.username,
+        },
       },
     })
+    console.log(3333, { result })
     if (!result) throw 'User not found!'
     const isPasswordMatch = await bcrypt.compare(data.password as string, result.password)
-    if (!isPasswordMatch) throw 'Email / password not correct!'
+    if (!isPasswordMatch) throw 'Password not correct!'
     return { ...result, ...generateToken(result) }
   }
 
