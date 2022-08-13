@@ -20,6 +20,7 @@ model User {
   id            Int       @id @default(autoincrement())
   created_at    DateTime? @default(now())
   updated_at    DateTime? @updatedAt
+  picture       String?
   name          String
   date_of_birth DateTime
   username      String?   @unique
@@ -37,16 +38,16 @@ model Tweet {
   updated_at DateTime? @updatedAt
   content    String
   attachment Json?     @default("{}")
-  user_id    User      @relation(fields: [userId], references: [id])
-  userId     Int
+  user       User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user_id    Int
 }
 
 model Follow {
   created_at   DateTime? @default(now())
   updated_at   DateTime? @updatedAt
-  follower     User      @relation("follower", fields: [follower_id], references: [id])
+  follower     User      @relation("follower", fields: [follower_id], references: [id], onDelete: Cascade)
   follower_id  Int
-  following    User      @relation("following", fields: [following_id], references: [id])
+  following    User      @relation("following", fields: [following_id], references: [id], onDelete: Cascade)
   following_id Int
 
   @@id([follower_id, following_id])

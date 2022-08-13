@@ -11,6 +11,9 @@
     "dev": "nodemon index.ts",
     "start": "ts-node index.ts"
   },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
+  },
   "dependencies": {
     "@prisma/client": "^4.2.1",
     "@types/bcrypt": "^5.0.0",
