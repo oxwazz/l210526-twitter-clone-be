@@ -5,7 +5,7 @@ import { getRandomArbitrary } from '../helpers/get-random-number'
 const prisma = new PrismaClient()
 
 faker.setLocale('id_ID')
-const TOTAL_SEED_PER_TABLE = 50
+const TOTAL_SEED_PER_TABLE = 30
 async function main() {
   let userIds = []
   // user
@@ -42,21 +42,29 @@ async function main() {
   }
 
   // unit
-  for (let i = 0; i < TOTAL_SEED_PER_TABLE; i++) {
+  for (let i = 0; i < TOTAL_SEED_PER_TABLE * 2; i++) {
     let follower_id = userIds[getRandomArbitrary(0, userIds.length - 1)]
     let following_id = userIds[getRandomArbitrary(0, userIds.length - 1)]
 
-    while (follower_id === following_id) {
-      follower_id = userIds[getRandomArbitrary(0, userIds.length - 1)]
-      following_id = userIds[getRandomArbitrary(0, userIds.length - 1)]
+    if (follower_id !== following_id) {
+      const data = await prisma.follow.upsert({
+        where: {
+          follower_id_following_id: {
+            follower_id,
+            following_id,
+          },
+        },
+        create: {
+          follower_id,
+          following_id,
+        },
+        update: {
+          follower_id,
+          following_id,
+        },
+      })
+      console.log(333303, data)
     }
-    const data = await prisma.follow.create({
-      data: {
-        follower_id,
-        following_id,
-      },
-    })
-    console.log(333303, data)
   }
 }
 

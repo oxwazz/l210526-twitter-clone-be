@@ -84,6 +84,7 @@ export class CustomUserResolver {
       },
     })
     console.log(3333, { result })
+    if (!data.email && !data.phone && !data.username) throw 'Check your input!'
     if (!result) throw 'User not found!'
     const isPasswordMatch = await bcrypt.compare(data.password as string, result.password)
     if (!isPasswordMatch) throw 'Password not correct!'
