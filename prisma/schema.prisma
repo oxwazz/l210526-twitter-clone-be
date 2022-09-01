@@ -28,8 +28,8 @@ model User {
   phone         String?
   password      String
   Tweets        Tweet[]
-  followers     Follow[]  @relation("follower")
-  followings    Follow[]  @relation("following")
+  followers     Follow[]  @relation("user")
+  followings    Follow[]  @relation("follower")
 }
 
 model Tweet {
@@ -43,12 +43,12 @@ model Tweet {
 }
 
 model Follow {
-  created_at   DateTime? @default(now())
-  updated_at   DateTime? @updatedAt
-  follower     User      @relation("follower", fields: [follower_id], references: [id], onDelete: Cascade)
-  follower_id  Int
-  following    User      @relation("following", fields: [following_id], references: [id], onDelete: Cascade)
-  following_id Int
+  created_at  DateTime? @default(now())
+  updated_at  DateTime? @updatedAt
+  user        User      @relation("user", fields: [user_id], references: [id], onDelete: Cascade)
+  user_id     Int
+  follower    User      @relation("follower", fields: [follower_id], references: [id], onDelete: Cascade)
+  follower_id Int
 
-  @@id([follower_id, following_id])
+  @@id([user_id, follower_id])
 }
